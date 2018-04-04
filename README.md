@@ -11,9 +11,9 @@ details.
 ## Introduction
 
 Deamonite is just syntactic sugar around Process.daemon and argparse, which are
-part of standard ruby. An it only works on Linux because it runs 'ps ax'. I
-know, thats clumsy and doesn't run on windows. Please contribute a better
-solution if you have to.
+part of standard ruby. And it gives you a simple loop. And it only works on
+*nix because it runs 'ps ax' (that rhymes). I know, thats clumsy and I'm a lazy
+git. Please contribute a better solution if you have to.
 
 ## Usage
 
@@ -32,7 +32,8 @@ end.loop!
 
 Everything inside the #new block is executed once. Everything inside the #run
 block is executed periodically. So make sure to include sleep to not bog down
-your CPU. #loop! finally starts a periodical loop.
+your CPU. Or not - listen to network connections. #loop! finally starts the
+contents of #run sequentially.
 
 In order to override options, or provide your own options at start:
 
