@@ -15,6 +15,12 @@ part of standard ruby. And it gives you a simple loop. And it only works on
 *nix because it runs 'ps ax' (that rhymes). I know, thats clumsy and I'm a lazy
 git. Please contribute a better solution if you have to.
 
+## Why
+
+After I reused similar code in about 20 projects I had make it into a gem.
+Sorry. Probably much better code out there does the same, but I am too lazy to
+search for it. Sorry.
+
 ## Usage
 
 Its fairly simple for now:

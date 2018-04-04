@@ -3,9 +3,9 @@ Gem::Specification.new do |s|
   s.version          = "0.1"
   s.platform         = Gem::Platform::RUBY
   s.license          = "LGPL-3.0"
-  s.summary          = "Daemonite - Process.daemon and argparse wrapper."
+  s.summary          = "Daemonite - Process.daemon and argparse wrapper for loopies."
 
-  s.description      = "Daemonite - Process.daemon and argparse wrapper."
+  s.description      = "Daemonite - Process.daemon and argparse wrapper for loopies."
 
   s.files            = Dir['{example/**/*,lib/*}'] + %w(COPYING Changelog Rakefile daemonite.gemspec README.md AUTHORS TODO)
   s.require_path     = 'lib'
