@@ -124,8 +124,8 @@ class Daemonite
     end
 
     puts "Server started as PID:#{Process.pid}"
-    File.write(@opts[:basepath] + '/' + @opts[:pidfile],Process.pid)
     Process.daemon(@opts[:basepath]) unless @opts[:verbose]
+    File.write(@opts[:basepath] + '/' + @opts[:pidfile],Process.pid) # after daemon, so that we get the forked pid
     Dir.chdir(@opts[:basepath])
     ::Kernel::at_exit do
       File.unlink(@opts[:basepath] + '/' + @opts[:pidfile])
