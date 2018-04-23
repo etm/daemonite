@@ -26,7 +26,8 @@ class Daemonite
     :pidfile         => File.basename($0,'.rb') + '.pid',
     :pidwrite        => true,
     :conffile        => File.basename($0,'.rb') + '.conf',
-    :runtime_options => [],
+    :runtime_cmds    => [],
+    :runtime_opts    => [],
     :cmdl_parsing    => true,
     :cmdl_operation  => 'start'
   }
@@ -46,10 +47,13 @@ class Daemonite
       ARGV.options { |opt|
         opt.summary_indent = ' ' * 4
         opt.banner = "Usage:\n#{opt.summary_indent}ruby #{$PROGRAM_NAME} [options] start|stop|restart|info" + (@opts[:runtime_options].length > 0 ? '|' : '') + @opts[:runtime_options].map{|ro| ro[0]}.join('|') + "\n"
+        @opts[:runtime_opts].each do |ro|
+          opt.on(*ro)
+        end
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { @opts[:verbose] = true }
         opt.on("--help", "-h", "This text.") { puts opt; exit }
         opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
-        @opts[:runtime_options].each do |ro|
+        @opts[:runtime_cmds].each do |ro|
           opt.separator(opt.summary_indent + ro[0].ljust(opt.summary_width+1) + ro[1])
         end
         opt.parse!
