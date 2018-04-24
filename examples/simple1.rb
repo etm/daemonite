@@ -1,7 +1,7 @@
 require_relative '../lib/daemonite'
 
 Daemonite.new do |opts|
-  opts['bla']
+  opts[:bla] = 42
 
   run do |opts|
     p opts
