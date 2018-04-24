@@ -19,7 +19,7 @@ require 'optparse'
 require 'psych'
 
 module Daemonism
-  OPTS = {
+  DAEMONISM_DEFAULT_OPTS = {
     :mode            => :debug,
     :verbose         => false,
     :basepath        => File.expand_path(File.dirname($0)),
@@ -35,8 +35,6 @@ module Daemonism
   }
 
   def daemonism(opts={},&block)
-    opts = OPTS.merge(opts)
-
     if File.exists?(opts[:basepath] + '/' + opts[:conffile])
       opts.merge!(Psych::load_file(opts[:basepath] + '/' + opts[:conffile]))
     end
@@ -68,10 +66,9 @@ module Daemonism
       @at_exit = nil
     end
     ########################################################################################################################
-
     opts[:repeat] = nil
-    instance_exec(opts,&block) if block_given?
     opts[:runtime_proc].call(opts) unless opts[:runtime_proc].nil?
+    instance_exec(opts,&block) if block_given?
 
     ########################################################################################################################
     # status and info
@@ -138,8 +135,6 @@ module Daemonism
       File.unlink(opts[:basepath] + '/' + opts[:pidfile])
       @at_exit.call if @at_exit
     end
-
-    opts
   end
 
   def at_exit(&blk)
@@ -150,9 +145,9 @@ end
 class Daemonite
   include Daemonism
 
-  def initialize(opts={},&block)
-    @opts = {}
-    @opts = daemonism(opts, &block).merge(@opts)
+  def initialize(opts={},&blk)
+    @opts = DAEMONISM_DEFAULT_OPTS.merge(opts)
+    daemonism @opts, &blk
   end
 
   def run(&block)

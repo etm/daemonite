@@ -15,5 +15,5 @@ task :push => :gem do |r|
 end
 
 task :install => :gem do |r|
-  `sudo gem install pkg/daemonite.gem`
+  `gem install pkg/daemonite.gem`
 end

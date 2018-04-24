@@ -18,14 +18,14 @@ opts = {
         end
       }
     ]
-  ]
+  ],
+  :runtime_proc => Proc.new {
+    opts[:cmdl_info] = opts[:url] = (opts[:secure] ? 'https://' : 'http://') + opts[:host] + ':' + opts[:port].to_s
+  }
 }
 
 Daemonite.new(opts) do |opts|
-  opts['bla'] = 42
-  opts[:runtime_proc] = Proc.new do
-    opts[:cmdl_info] = opts[:url] = (opts[:secure] ? 'https://' : 'http://') + opts[:host] + ':' + opts[:port].to_s
-  end
+  opts[:bla] = 42
 
   run do |opts|
     p opts
