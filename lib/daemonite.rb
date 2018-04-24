@@ -38,6 +38,10 @@ module Daemonism
     if File.exists?(opts[:basepath] + '/' + opts[:conffile])
       opts.merge!(Psych::load_file(opts[:basepath] + '/' + opts[:conffile]))
     end
+    Dir.chdir(opts[:basepath])
+
+    # set more default options and do other stuff
+    instance_exec(opts,&block) if block_given?
 
     ########################################################################################################################
     # parse arguments
@@ -68,7 +72,6 @@ module Daemonism
     ########################################################################################################################
     opts[:repeat] = nil
     opts[:runtime_proc].call(opts) unless opts[:runtime_proc].nil?
-    instance_exec(opts,&block) if block_given?
 
     ########################################################################################################################
     # status and info
