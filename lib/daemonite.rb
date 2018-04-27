@@ -41,6 +41,7 @@ module Daemonism
     Dir.chdir(opts[:basepath])
 
     # set more default options and do other stuff
+    opts[:repeat] = nil
     instance_exec(opts,&block) if block_given?
 
     ########################################################################################################################
@@ -70,7 +71,6 @@ module Daemonism
       @at_exit = nil
     end
     ########################################################################################################################
-    opts[:repeat] = nil
     opts[:runtime_proc].call(opts) unless opts[:runtime_proc].nil?
 
     ########################################################################################################################
@@ -86,11 +86,11 @@ module Daemonism
       end
     end
     if opts[:cmdl_operation] == "info" && status.call == false
-      puts "Server #{opts[:cmdl_info].nil? ? ' ' : '(' + opts[:cmdl_info].to_s + ') '}not running"
+      puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}not running"
       exit
     end
     if opts[:cmdl_operation] == "info" && status.call == true
-      puts "Server #{opts[:cmdl_info].nil? ? ' ' : '(' + opts[:cmdl_info].to_s + ') '}running as #{pid}"
+      puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}running as #{pid}"
       begin
         stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
         puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
@@ -102,7 +102,7 @@ module Daemonism
       exit
     end
     if %w{start}.include?(opts[:cmdl_operation]) && status.call == true
-      puts "Server #{opts[:cmdl_info].nil? ? ' ' : '(' + opts[:cmdl_info].to_s + ') '}already started"
+      puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}already started"
       exit
     end
 
@@ -111,9 +111,9 @@ module Daemonism
     ########################################################################################################################
     if %w{stop restart}.include?(opts[:cmdl_operation])
       if status.call == false
-        puts "Server #{opts[:cmdl_info].nil? ? ' ' : '(' + opts[:cmdl_info].to_s + ') '}maybe not started?"
+        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}maybe not started?"
       else
-        puts "Server #{opts[:cmdl_info].nil? ? ' ' : '(' + opts[:cmdl_info].to_s + ') '}stopped"
+        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}stopped"
         puts "Waiting while server goes down ..."
         while status.call
           Process.kill "SIGTERM", pid
@@ -130,7 +130,7 @@ module Daemonism
       ro[2].call(status.call) if opts[:cmdl_operation] == ro[0]
     end
 
-    puts "Server #{opts[:cmdl_info].nil? ? ' ' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
+    puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
     Process.daemon(opts[:basepath]) unless opts[:verbose]
     File.write(opts[:basepath] + '/' + opts[:pidfile],Process.pid) # after daemon, so that we get the forked pid
     Dir.chdir(opts[:basepath])
