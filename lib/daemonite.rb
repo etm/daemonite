@@ -41,7 +41,7 @@ module Daemonism
     Dir.chdir(opts[:basepath])
 
     # set more default options and do other stuff
-    opts[:repeat] = nil
+    opts[:block] = nil
     instance_exec(opts,&block) if block_given?
 
     ########################################################################################################################
@@ -154,14 +154,22 @@ class Daemonite
   end
 
   def run(&block)
-    @opts[:repeat] = block
+    @opts[:block] = block
+  end
+
+  def go!
+    begin
+      @opts[:block].call(@opts)
+    rescue => e
+      puts "Server stopped due to error (PID:#{Process.pid})"
+    end
   end
 
   def loop!
     begin
       loop do
-        @opts[:repeat].call(@opts)
-      end unless @opts[:repeat].nil?
+        @opts[:block].call(@opts)
+      end unless @opts[:block].nil?
     rescue => e
       puts "Server stopped due to error (PID:#{Process.pid})"
     end
