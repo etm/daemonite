@@ -56,6 +56,11 @@ module Daemonism
           opt.on(*ro)
         end
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { opts[:verbose] = true }
+        opt.on("--config=FNAME", "-cFNAME", "Config file location.") { |f,a|
+          if File.exists?(opts[:basepath] + '/' + f)
+            opts.merge!(Psych::load_file(opts[:basepath] + '/' + f))
+          end
+        }
         opt.on("--help", "-h", "This text.") { puts opt; exit }
         opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
         opts[:runtime_cmds].each do |ro|
