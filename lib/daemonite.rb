@@ -19,6 +19,8 @@ require 'optparse'
 require 'psych'
 
 module Daemonism
+  @@daemonism_restart = false
+
   DAEMONISM_DEFAULT_OPTS = {
     :mode            => :debug,
     :verbose         => false,
@@ -90,59 +92,66 @@ module Daemonism
         false
       end
     end
-    if opts[:cmdl_operation] == "info" && status.call == false
-      puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}not running"
-      exit
-    end
-    if opts[:cmdl_operation] == "info" && status.call == true
-      puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}running as #{pid}"
-      begin
-        stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
-        puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
-        puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
-        puts "Started:  #{stats[2..-2].join(' ')}"
-        puts "CPU Time: #{stats.last}"
-      rescue
+    unless @@daemonism_restart
+      if opts[:cmdl_operation] == "info" && status.call == false
+        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}not running"
+        exit
       end
-      exit
-    end
-    if %w{start}.include?(opts[:cmdl_operation]) && status.call == true
-      puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}already started"
-      exit
+      if opts[:cmdl_operation] == "info" && status.call == true
+        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}running as #{pid}"
+        begin
+          stats = `ps -o "vsz,rss,lstart,time" -p #{pid}`.split("\n")[1].strip.split(/ +/)
+          puts "Virtual:  #{"%0.2f" % (stats[0].to_f/1024)} MiB"
+          puts "Resident: #{"%0.2f" % (stats[1].to_f/1024)} MiB"
+          puts "Started:  #{stats[2..-2].join(' ')}"
+          puts "CPU Time: #{stats.last}"
+        rescue
+        end
+        exit
+      end
+      if %w{start}.include?(opts[:cmdl_operation]) && status.call == true
+        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}already started"
+        exit
+      end
     end
 
     ########################################################################################################################
     # stop/restart server
     ########################################################################################################################
-    if %w{stop restart}.include?(opts[:cmdl_operation])
-      if status.call == false
-        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}maybe not started?"
-      else
-        puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}stopped"
-        puts "Waiting while server goes down ..."
-        while status.call
-          Process.kill "SIGTERM", pid
-          sleep 0.3
+    unless @@daemonism_restart
+      if %w{stop restart}.include?(opts[:cmdl_operation])
+        if status.call == false
+          puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}maybe not started?"
+        else
+          puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}stopped"
+          puts "Waiting while server goes down ..."
+          while status.call
+            Process.kill "SIGTERM", pid
+            sleep 0.3
+          end
         end
+        exit unless opts[:cmdl_operation] == "restart"
       end
-      exit unless opts[:cmdl_operation] == "restart"
     end
 
     ########################################################################################################################
     # go through user defined startup thingis
     ########################################################################################################################
-    opts[:runtime_cmds].each do |ro|
-      ro[2].call(status.call) if opts[:cmdl_operation] == ro[0]
-    end
+    unless @@daemonism_restart
+      opts[:runtime_cmds].each do |ro|
+        ro[2].call(status.call) if opts[:cmdl_operation] == ro[0]
+      end
+      @@daemonism_restart = true
 
-    retain = $stdout.dup
-    Process.daemon(opts[:basepath]) unless opts[:verbose]
-    retain.puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
-    File.write(opts[:basepath] + '/' + opts[:pidfile],Process.pid) # after daemon, so that we get the forked pid
-    Dir.chdir(opts[:basepath])
-    ::Kernel::at_exit do
-      File.unlink(opts[:basepath] + '/' + opts[:pidfile])
-      @at_exit.call if @at_exit
+      retain = $stdout.dup
+      Process.daemon(opts[:basepath]) unless opts[:verbose]
+      retain.puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
+      File.write(opts[:basepath] + '/' + opts[:pidfile],Process.pid) # after daemon, so that we get the forked pid
+      Dir.chdir(opts[:basepath])
+      ::Kernel::at_exit do
+        File.unlink(opts[:basepath] + '/' + opts[:pidfile])
+        @at_exit.call if @at_exit
+      end
     end
   end
 
