@@ -135,8 +135,9 @@ module Daemonism
       ro[2].call(status.call) if opts[:cmdl_operation] == ro[0]
     end
 
-    puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
+    retain = $stdout.dup
     Process.daemon(opts[:basepath]) unless opts[:verbose]
+    retain.puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
     File.write(opts[:basepath] + '/' + opts[:pidfile],Process.pid) # after daemon, so that we get the forked pid
     Dir.chdir(opts[:basepath])
     ::Kernel::at_exit do
