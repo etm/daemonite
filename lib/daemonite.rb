@@ -74,7 +74,7 @@ module Daemonism
         opt.parse!
       }
 
-      unless (%w{start stop restart} + opts[:runtime_cmds].map{|ro| ro[0] }).include?(ARGV[0])
+      unless (%w{start stop restart info} + opts[:runtime_cmds].map{|ro| ro[0] }).include?(ARGV[0])
         puts ARGV.options
         ::Kernel::exit
       end
