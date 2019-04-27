@@ -37,6 +37,9 @@ module Daemonism
   }
 
   def daemonism(opts={},&block)
+    @at_exit = nil
+    @at_start = nil
+
     if File.exists?(opts[:basepath] + '/' + opts[:conffile])
       opts.merge!(Psych::load_file(opts[:basepath] + '/' + opts[:conffile]))
     end
@@ -70,12 +73,12 @@ module Daemonism
         end
         opt.parse!
       }
-      unless (%w{start stop restart info} + opts[:runtime_cmds].map{|ro| ro[0] }).include?(ARGV[0])
+
+      unless (%w{start stop restart} + opts[:runtime_cmds].map{|ro| ro[0] }).include?(ARGV[0])
         puts ARGV.options
-        exit
+        exit!
       end
       opts[:cmdl_operation] = ARGV[0]
-      @at_exit = nil
     end
     ########################################################################################################################
     opts[:runtime_proc].call(opts) unless opts[:runtime_proc].nil?
@@ -155,9 +158,25 @@ module Daemonism
     end
   end
 
-  def at_exit(&blk)
-    @at_exit = blk
+  def on(event,&blk)
+    case event
+      when :exit
+        @at_exit = blk
+      when :startup
+        @at_startup = blk
+    end
   end
+  def exit; :exit; end
+  def startup; :startup; end
+  def on_exit(&blk)
+    on :exit, &blk
+  end
+  def on_startup(&blk)
+    on :startup, &blk
+  end
+  alias_method :at, :on
+  alias_method :at_exit, :on_exit
+  alias_method :at_startup, :on_startup
 end
 
 class Daemonite
@@ -174,7 +193,10 @@ class Daemonite
 
   def go!
     begin
+      @at_startup.call if @at_startup
       @opts[:block].call(@opts)
+    rescue SystemExit, Interrupt
+      puts "Server stopped due to interrupt (PID:#{Process.pid})"
     rescue => e
       puts "Server stopped due to error (PID:#{Process.pid})"
     end
@@ -182,9 +204,12 @@ class Daemonite
 
   def loop!
     begin
+      @at_startup.call if @at_startup
       loop do
         @opts[:block].call(@opts)
       end unless @opts[:block].nil?
+    rescue SystemExit, Interrupt
+      puts "Server stopped due to interrupt (PID:#{Process.pid})"
     rescue => e
       puts "Server stopped due to error (PID:#{Process.pid})"
     end

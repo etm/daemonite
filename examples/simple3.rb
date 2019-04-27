@@ -31,7 +31,7 @@ Daemonite.new(opts) do |opts|
     p opts
     sleep 1
   end
-  at_exit do
-    p 'rrr'
+  on exit do
+    p 'bye bye'
   end
 end.loop!

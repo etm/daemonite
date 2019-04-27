@@ -8,6 +8,6 @@ daemon.run do |opts|
   sleep 1
 end
 daemon.at_exit do
-  p 'rrr'
+  p 'bye bye'
 end
 daemon.loop!

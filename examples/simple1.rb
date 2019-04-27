@@ -8,6 +8,6 @@ Daemonite.new do |opts|
     sleep 1
   end
   at_exit do
-    p 'rrr'
+    p 'bye bye'
   end
 end.loop!
