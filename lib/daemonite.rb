@@ -66,7 +66,7 @@ module Daemonism
             opts.merge!(Psych::load_file(opts[:basepath] + '/' + f))
           end
         }
-        opt.on("--help", "-h", "This text.") { puts opt; exit }
+        opt.on("--help", "-h", "This text.") { puts opt; exit! }
         opt.separator(opt.summary_indent + "start|stop|restart|info".ljust(opt.summary_width+1) + "Do operation start, stop, restart or get information.")
         opts[:runtime_cmds].each do |ro|
           opt.separator(opt.summary_indent + ro[0].ljust(opt.summary_width+1) + ro[1])
@@ -98,7 +98,7 @@ module Daemonism
     unless @@daemonism_restart
       if opts[:cmdl_operation] == "info" && status.call == false
         puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}not running"
-        exit
+        exit!
       end
       if opts[:cmdl_operation] == "info" && status.call == true
         puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}running as #{pid}"
@@ -110,11 +110,11 @@ module Daemonism
           puts "CPU Time: #{stats.last}"
         rescue
         end
-        exit
+        exit!
       end
       if %w{start}.include?(opts[:cmdl_operation]) && status.call == true
         puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}already started"
-        exit
+        exit!
       end
     end
 
@@ -133,7 +133,7 @@ module Daemonism
             sleep 0.3
           end
         end
-        exit unless opts[:cmdl_operation] == "restart"
+        exit! unless opts[:cmdl_operation] == "restart"
       end
     end
 
