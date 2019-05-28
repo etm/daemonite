@@ -153,7 +153,7 @@ module Daemonism
       Dir.chdir(opts[:basepath])
       ::Kernel::at_exit do
         File.unlink(opts[:basepath] + '/' + opts[:pidfile])
-        @at_exit.call if @at_exit
+        @at_exit.call(opts) if @at_exit
       end
     end
   end
@@ -193,7 +193,7 @@ class Daemonite
 
   def go!
     begin
-      @at_startup.call if @at_startup
+      @at_startup.call(@opts) if @at_startup
       @opts[:block].call(@opts)
     rescue SystemExit, Interrupt
       puts "Server stopped due to interrupt (PID:#{Process.pid})"
@@ -204,7 +204,7 @@ class Daemonite
 
   def loop!
     begin
-      @at_startup.call if @at_startup
+      @at_startup.call(@opts) if @at_startup
       loop do
         @opts[:block].call(@opts)
       end unless @opts[:block].nil?
