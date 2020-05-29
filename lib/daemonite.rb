@@ -174,6 +174,9 @@ module Daemonism
   def on_startup(&blk)
     on :startup, &blk
   end
+  def use(blk)
+    instance_eval(&blk)
+  end
   alias_method :at, :on
   alias_method :at_exit, :on_exit
   alias_method :at_startup, :on_startup
