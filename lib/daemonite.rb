@@ -147,7 +147,7 @@ module Daemonism
       @@daemonism_restart = true
 
       retain = $stdout.dup
-      Process.daemon(opts[:basepath]) unless opts[:verbose]
+      Process.daemon unless opts[:verbose]
       retain.puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}started as PID:#{Process.pid}"
       File.write(opts[:basepath] + '/' + opts[:pidfile],Process.pid) # after daemon, so that we get the forked pid
       Dir.chdir(opts[:basepath])
