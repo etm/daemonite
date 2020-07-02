@@ -133,6 +133,8 @@ module Daemonism
           while status.call
             if count > opts[:kill_amount]
               Process.kill "SIGKILL", pid
+              File.unlink(opts[:basepath] + '/' + opts[:pidfile])
+              @at_exit.call(opts) if @at_exit
             else
               Process.kill "SIGTERM", pid
             end
