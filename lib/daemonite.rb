@@ -33,7 +33,8 @@ module Daemonism
     :runtime_proc    => nil,
     :cmdl_info       => nil,
     :cmdl_parsing    => true,
-    :cmdl_operation  => 'start'
+    :cmdl_operation  => 'start',
+    :kill_amount     => 1000
   }
 
   def daemonism(opts={},&block)
@@ -128,8 +129,14 @@ module Daemonism
         else
           puts "Server #{opts[:cmdl_info].nil? ? '' : '(' + opts[:cmdl_info].to_s + ') '}stopped"
           puts "Waiting while server goes down ..."
+          count = 0
           while status.call
-            Process.kill "SIGTERM", pid
+            if count > opts[:kill_amount]
+              Process.kill "SIGKILL", pid
+            else
+              Process.kill "SIGTERM", pid
+            end
+            count += 1
             sleep 0.3
           end
         end
