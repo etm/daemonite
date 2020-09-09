@@ -34,7 +34,7 @@ module Daemonism
     :cmdl_info       => nil,
     :cmdl_parsing    => true,
     :cmdl_operation  => 'start',
-    :kill_amount     => 1000
+    :kill_amount     => 100
   }
 
   def daemonism(opts={},&block)
