@@ -135,7 +135,11 @@ module Daemonism
               Process.kill "SIGKILL", pid
               File.unlink(opts[:basepath] + '/' + opts[:pidfile])
             else
-              Process.kill "SIGTERM", pid
+              if opts[:cmdl_operation] == 'stop'
+                Process.kill "SIGTERM", pid
+              else
+                Process.kill "SIGHUP", pid
+              end
             end
             count += 1
             sleep 0.3
