@@ -39,7 +39,8 @@ module Daemonism
 
   def daemonism(opts={},&block)
     @at_exit = nil
-    @at_start = nil
+    @at_startup = nil
+    @at_setup = nil
 
     if File.exists?(opts[:basepath] + '/' + opts[:conffile])
       opts.merge!(Psych::load_file(opts[:basepath] + '/' + opts[:conffile]))
@@ -49,6 +50,7 @@ module Daemonism
     # set more default options and do other stuff
     opts[:block] = nil
     instance_exec(opts,&block) if block_given?
+
 
     ########################################################################################################################
     # parse arguments
@@ -83,6 +85,11 @@ module Daemonism
     end
     ########################################################################################################################
     opts[:runtime_proc].call(opts) unless opts[:runtime_proc].nil?
+
+    ########################################################################################################################
+    # call this if you want to change important things such as pidfile after parsing (but before any formal start)
+    ########################################################################################################################
+    @at_setup.call(opts) if @at_setup
 
     ########################################################################################################################
     # status and info
@@ -176,15 +183,21 @@ module Daemonism
         @at_exit = blk
       when :startup
         @at_startup = blk
+      when :setup
+        @at_setup = blk
     end
   end
   def exit; :exit; end
   def startup; :startup; end
+  def setup; :setup; end
   def on_exit(&blk)
     on :exit, &blk
   end
   def on_startup(&blk)
     on :startup, &blk
+  end
+  def on_setup(&blk)
+    on :setup, &blk
   end
   def use(blk)
     instance_eval(&blk)
@@ -192,6 +205,7 @@ module Daemonism
   alias_method :at, :on
   alias_method :at_exit, :on_exit
   alias_method :at_startup, :on_startup
+  alias_method :at_setup, :on_setup
 end
 
 class Daemonite
