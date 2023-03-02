@@ -50,6 +50,32 @@ Daemonite.new(opts)
 Also be aware that a json configuration file $PROGRAM_NAME.sub /\.rb$/, '.conf'
 is automatically read, if it exists.
 
+## Usage - Sinatra
+
+Give PID file + daemon start, stop, restart, info functionality to sinatra. Stack overflow overflows with questions about it :-)
+
+```ruby
+require 'sinatra/base'
+require 'daemonite'
+                                                                                                                               
+Daemonite.new do |opts|
+  on startup do
+    opts[:sin] = Sinatra.new do
+      set :port, 9327
+      Encoding.default_external = "UTF-8"
+
+      get '/' do
+        'Hello world!'
+      end
+    end
+  end
+  
+  run do
+    opts[:sin].run!
+  end
+end.go!
+```
+
 ## Usage - Alternative
 
 ```ruby
