@@ -42,7 +42,7 @@ module Daemonism
     @at_startup = nil
     @at_setup = nil
 
-    if File.exists?(opts[:basepath] + '/' + opts[:conffile])
+    if File.exist?(opts[:basepath] + '/' + opts[:conffile])
       opts.merge!(Psych::load_file(opts[:basepath] + '/' + opts[:conffile]))
     end
     Dir.chdir(opts[:basepath])
@@ -65,7 +65,7 @@ module Daemonism
         end
         opt.on("--verbose", "-v", "Do not daemonize. Write ouput to console.") { opts[:verbose] = true }
         opt.on("--config=FNAME", "-cFNAME", "Config file location.") { |f,a|
-          if File.exists?(opts[:basepath] + '/' + f)
+          if File.exist?(opts[:basepath] + '/' + f)
             opts.merge!(Psych::load_file(opts[:basepath] + '/' + f))
           end
         }
